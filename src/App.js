@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import geolocation from "./geolocation";
+import cities from "./cities.json";
 
 function App() {
   const [temperature, setTemperature] = useState();
@@ -83,7 +84,7 @@ function App() {
         `https://weather-proxy.freecodecamp.rocks/api/current?lat=${coords.latitude}&lon=${coords.longitude}`
       );
       const responseJSON = await response.json();
-      setCityName(locationInformation.city);
+      setCityName(locationInformation.city.toLowerCase());
       setLocation(locationInformation.location);
       setTemperature(Math.floor(responseJSON.main.temp));
       setFeelsLikeTemp(Math.floor(responseJSON.main.feels_like));
@@ -95,30 +96,43 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <p id="city">
-        Weather in {cityName}, {location}
-      </p>
-      <p>
-        <img src={weatherIcon} alt="weather-icon" />
-      </p>
-      <p>{weatherDescription}</p>
-      <p>
-        {isFahrenheit ? celsiusToFahrenheit(temperature) : temperature}&deg;{" "}
-        {isFahrenheit ? "F" : "C"}
-      </p>
-      <p>
-        Feels Like:{" "}
-        {isFahrenheit ? celsiusToFahrenheit(feelsLikeTemp) : temperature}&deg;{" "}
-        {isFahrenheit ? "F" : "C"}
-      </p>
-      <button onClick={handleChangeTempMeasurement}>
-        {isFahrenheit ? "Display Celsius" : " Display Fahrenheit"}
-      </button>
-      <form onSubmit={handleSubmit}>
-        <input type="text" value={city} onChange={handleCityInputChange} />
-        <input type="submit" value="Submit" />
-      </form>
+    <div className="container d-flex h-100 mt-5">
+      <div className="row justify-content-center text-center align-self-center">
+        <h1>
+          Weather in <span className="text-capitalize">{cityName}</span>,{" "}
+          {location}
+        </h1>
+        <p>
+          <img src={weatherIcon} alt="weather-icon" />
+        </p>
+        <p>{weatherDescription}</p>
+        <p>
+          {isFahrenheit ? celsiusToFahrenheit(temperature) : temperature}&deg;{" "}
+          {isFahrenheit ? "F" : "C"}
+        </p>
+        <p>
+          Feels Like:{" "}
+          {isFahrenheit ? celsiusToFahrenheit(feelsLikeTemp) : temperature}&deg;{" "}
+          {isFahrenheit ? "F" : "C"}
+        </p>
+        <button onClick={handleChangeTempMeasurement}>
+          {isFahrenheit ? "Display Celsius" : " Display Fahrenheit"}
+        </button>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            list="cities-list"
+            value={city}
+            onChange={handleCityInputChange}
+          />
+          <datalist id="cities-list">
+            {cities.map((entry) => (
+              <option value={`${entry.city}, ${entry.state}`} />
+            ))}
+          </datalist>
+          <input type="submit" value="Submit" />
+        </form>
+      </div>
     </div>
   );
 }

@@ -108,42 +108,75 @@ function App() {
   };
 
   return (
-    <div className="container d-flex h-100 mt-5">
-      <div className="row justify-content-center text-center align-self-center">
-        <h1>
-          Weather in <span className="text-capitalize">{cityName}</span>,{" "}
-          {location}
-        </h1>
-        <p>
-          <img src={weatherIcon} alt="weather-icon" />
-        </p>
-        <p>{weatherDescription}</p>
-        <p>
-          {isFahrenheit ? celsiusToFahrenheit(temperature) : temperature}&deg;{" "}
-          {isFahrenheit ? "F" : "C"}
-        </p>
-        <p>
-          Feels Like:{" "}
-          {isFahrenheit ? celsiusToFahrenheit(feelsLikeTemp) : temperature}&deg;{" "}
-          {isFahrenheit ? "F" : "C"}
-        </p>
-        <button onClick={handleChangeTempMeasurement}>
-          {isFahrenheit ? "Display Celsius" : " Display Fahrenheit"}
-        </button>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            list="cities-list"
-            value={city}
-            onChange={handleCityInputChange}
-          />
-          <datalist id="cities-list">
-            {cities.map((entry) => (
-              <option value={`${entry.city}, ${entry.state}`} />
-            ))}
-          </datalist>
-          <input type="submit" value="Submit" />
-        </form>
+    <div className="container">
+      <div className="row">
+        <div className="col text-center text-white">
+          <div className="position-absolute ml-0">
+            <button
+              onClick={handleChangeTempMeasurement}
+              className="btn btn-circle"
+            >
+              &deg;{isFahrenheit ? "C" : "F"}
+            </button>
+            <div className="mt-10">
+              <button onClick={handleLocationChange} className="btn btn-circle">
+                <i class="fas fa-location-arrow"></i>
+              </button>
+            </div>
+          </div>
+          <h1>
+            Weather in{" "}
+            <span id="location">
+              <span className="text-capitalize">{cityName.toLowerCase()}</span>,{" "}
+              {stateName}
+            </span>
+          </h1>
+          <div>
+            <img id="weather-icon" src={weatherIcon} alt="weather-icon" />
+          </div>
+          <div>
+            <h4>{weatherDescription}</h4>
+          </div>
+          <div>
+            <h4>
+              {isFahrenheit ? celsiusToFahrenheit(temperature) : temperature}
+              &deg; {isFahrenheit ? "F" : "C"}
+            </h4>
+          </div>
+          <div>
+            <h4>
+              Feels Like:{" "}
+              {isFahrenheit ? celsiusToFahrenheit(feelsLikeTemp) : temperature}
+              &deg; {isFahrenheit ? "F" : "C"}
+            </h4>
+          </div>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col">
+          <div className="mx-auto form-group w-50">
+            <form onSubmit={handleSubmit} className="form-group">
+              <label for="location-input" className="form-label">
+                Search Another Location
+              </label>
+              <input
+                className="form-control"
+                id="location-input"
+                type="text"
+                list="cities-list"
+                value={searchInput}
+                onChange={handleCityInputChange}
+                placeholder="Type to search..."
+              />
+              <datalist id="cities-list" className="dropdown-menu">
+                {cities.map((entry) => (
+                  <option value={`${entry.city}, ${entry.state}`} />
+                ))}
+              </datalist>
+              {/* <input type="submit" value="Submit" /> */}
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import geolocation from "./geolocation";
-import cities from "./cities.json";
+import cities from "./cities2.json";
+import "./App.css";
 
 function App() {
   const [temperature, setTemperature] = useState();
   const [isFahrenheit, setFahrenheit] = useState(true);
-  const [cityName, setCityName] = useState("");
-  const [city, setCity] = useState("");
-  const [location, setLocation] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [feelsLikeTemp, setFeelsLikeTemp] = useState();
   const [weatherIcon, setWeatherIcon] = useState("");
   const [weatherDescription, setWeatherDescription] = useState("");
+  const [cityName, setCityName] = useState("");
+  const [stateName, setStateName] = useState("");
 
   const GEOCODE_API_KEY = `${process.env.REACT_APP_GEOCODE_API_KEY}`;
 
@@ -26,23 +27,31 @@ function App() {
     setFahrenheit(!isFahrenheit);
   };
 
+  const handleLocationChange = () => {
+    callAPI();
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     callAPI();
   };
 
   const handleCityInputChange = (e) => {
-    setCity(e.target.value);
-    console.log(city);
+    const locationInput = document.getElementById("location-input");
+    setSearchInput(locationInput.value);
   };
 
-  const geocode = async (city) => {
+  const geocode = async (scanText) => {
     try {
       const response = await fetch(
-        `https://geocode.xyz/${encodeURIComponent(city)}?json=1`
+        `https://geocode.xyz/?scantext=${encodeURIComponent(
+          scanText
+        )}&json=1&region=US`
       );
       const responseJSON = await response.json();
-      return { latitude: responseJSON.latt, longitude: responseJSON.longt };
+      const bestMatch =
+        responseJSON.matches * 1 > 0 ? responseJSON.match[0] : responseJSON;
+      return { latitude: bestMatch.latt, longitude: bestMatch.longt };
     } catch (error) {
       console.log(error);
     }
@@ -50,23 +59,24 @@ function App() {
 
   const reverseGeocode = async (coords) => {
     try {
-      const formData = new FormData();
-      formData.append("auth", GEOCODE_API_KEY);
-      formData.append("locate", coords);
-      formData.append("json", 1);
+      const response = await fetch(
+        `https://geocode.xyz/?locate=${encodeURIComponent(coords)}&json=1`
+      );
 
-      const response = await fetch(`https://geocode.xyz`, {
-        method: "POST",
-        body: formData,
-      });
+      // const formData = new FormData();
+      // formData.append("auth", GEOCODE_API_KEY);
+      // formData.append("locate", coords);
+      // formData.append("json", 1);
+
+      // const response = await fetch(`https://geocode.xyz`, {
+      //   method: "POST",
+      //   formData,
+      // });
       const responseJSON = await response.json();
-      console.log(responseJSON);
+
       return {
         city: responseJSON.city,
-        location:
-          responseJSON.country === "United States of America"
-            ? responseJSON.state
-            : responseJSON.country,
+        state: responseJSON.state,
       };
     } catch (error) {
       console.log(error);
@@ -75,17 +85,19 @@ function App() {
 
   const callAPI = async () => {
     try {
-      const coords = city ? await geocode(city) : await geolocation();
+      const coords = searchInput
+        ? await geocode(searchInput)
+        : await geolocation();
       const locationInformation = await reverseGeocode(
         `${coords.latitude},${coords.longitude}`
       );
-
       const response = await fetch(
         `https://weather-proxy.freecodecamp.rocks/api/current?lat=${coords.latitude}&lon=${coords.longitude}`
       );
       const responseJSON = await response.json();
-      setCityName(locationInformation.city.toLowerCase());
-      setLocation(locationInformation.location);
+      setCityName(locationInformation.city);
+      setStateName(locationInformation.state);
+      //comes from Free Code Camp API
       setTemperature(Math.floor(responseJSON.main.temp));
       setFeelsLikeTemp(Math.floor(responseJSON.main.feels_like));
       setWeatherIcon(responseJSON.weather[0].icon);
